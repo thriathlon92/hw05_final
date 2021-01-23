@@ -6,7 +6,7 @@ from django.urls import reverse
 from yatube.settings import PAGE_SIZE
 
 from .forms import PostForm, CommentForm
-from .models import Group, Post, User, Comment
+from .models import Group, Post, User, Comment, Follow
 
 
 def index(request):
@@ -51,15 +51,17 @@ def new_posts(request):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, PAGE_SIZE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     count = post_list.count()
+    following = Follow.objects.filter(user=request.user, author=author).exists()
     context = {
         'author': author,
         'page': page,
         'count': count,
         'paginator': paginator,
+        'following': following,
     }
 
     return render(request, 'profile.html', context)
@@ -69,7 +71,7 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id, author__username=username)
     count = Post.objects.filter(author=post.author).select_related(
         'author').count()
-    comments = Comment.objects.filter(post_id=post.pk)
+    comments = post.comments.all()
     form = PostForm(request.POST or None)
     return render(request, 'post.html', {
         'author': post.author,
@@ -114,6 +116,33 @@ def add_comment(request, username, post_id):
             return redirect('post', username=username, post_id=post_id)
     return render(request, 'post.html',
                   {'post': post, 'author': post.author, 'form': form})
+
+
+@login_required
+def follow_index(request):
+    post = Post.objects.filter(author__following__user=request.user)
+    paginator = Paginator(post, PAGE_SIZE)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    return render(request, "follow.html",
+                  {'page': page, 'paginator': paginator})
+
+
+@login_required
+def profile_follow(request, username):
+    author = get_object_or_404(User, username=username)
+    if request.user != author and not Follow.objects.filter(
+            user=request.user, author=author).exists():
+        Follow.objects.get_or_create(user=request.user, author=author)
+        return redirect("profile", username=username)
+    return redirect("profile", username=username)
+
+
+@login_required
+def profile_unfollow(request, username):
+    author = get_object_or_404(User, username=username)
+    Follow.objects.filter(user=request.user, author=author).delete()
+    return redirect('profile', username=username)
 
 
 def page_not_found(request, exception):
