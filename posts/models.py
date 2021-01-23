@@ -56,7 +56,7 @@ class Post(models.Model):
         related_name='group_posts',
     )
     image = models.ImageField(
-        upload_to='media',
+        upload_to='posts/',
         blank=True,
         null=True
     )
@@ -82,7 +82,7 @@ class Comment(models.Model):
     )
     text = models.TextField(
         'Комментарий',
-        max_length=200,
+        max_length=100,
     )
     created = models.DateTimeField(
         'Дата публикации',
@@ -110,5 +110,7 @@ class Follow(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user'], name='unique_object')
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='unique_object'
+            )
         ]

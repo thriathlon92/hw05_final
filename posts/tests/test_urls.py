@@ -52,6 +52,15 @@ class URLTests(TestCase):
                                     'post_id': self.post.pk}): 200,
             reverse('post_edit', kwargs={'username': self.post.author.username,
                                          'post_id': self.post.pk}): 302,
+            '/weird/url/': 404,
+            reverse('add_comment',
+                    kwargs={'username': self.post.author.username,
+                            'post_id': self.post.pk
+                            }): 302,
+            reverse('profile_follow',
+                    kwargs={'username': self.post.author.username}): 302,
+            reverse('profile_unfollow',
+                    kwargs={'username': self.post.author.username}): 302,
         }
         for key, value in urls.items():
             response = self.guest_client.get(key)
@@ -63,12 +72,15 @@ class URLTests(TestCase):
             reverse('index'): 200,
             reverse('group', args=[self.group.slug]): 200,
             reverse('new_post'): 200,
-            reverse('profile', kwargs={'username': self.post.author.username}): 200,
+            reverse('profile',
+                    kwargs={'username': self.post.author.username}): 200,
             reverse('post', kwargs={'username': self.post.author.username,
                                     'post_id': self.post.pk}): 200,
             reverse('post_edit', kwargs={'username': self.post.author.username,
                                          'post_id': self.post.pk}): 200,
-            '/weird/url/': 404,
+            reverse('add_comment',
+                    kwargs={'username': self.post.author.username,
+                            'post_id': self.post.pk}): 200,
         }
         for key, value in urls.items():
             response = self.authorized_client.get(key)

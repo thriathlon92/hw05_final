@@ -4,7 +4,7 @@
         <p class="card-text">
             <a href="{% url 'profile' post.author.username %}">
                 <strong class="d-block text-gray-dark">
-                    {{ author }}</strong></a>
+                    {{ post.author }}</strong></a>
             <!-- Текст поста -->
                     {{ post.text|linebreaksbr }}
             </p>

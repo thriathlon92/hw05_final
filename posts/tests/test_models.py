@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
 
 
 class GroupModelTest(TestCase):
@@ -80,7 +80,7 @@ class PostModelTest(TestCase):
                     post._meta.get_field(value).help_text, expected)
 
     def test_object_name_is_title_fild(self):
-        """В поле __str__  объекта task записано значение поля task.title."""
+        """В поле __str__  объекта  записано значение поля post.title."""
         post = self.post
         expected_object_name = post.text[:15]
         self.assertEqual(expected_object_name, str(post))

@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.forms import PostForm
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
 
 
 class PostFormTests(TestCase):
@@ -83,3 +83,19 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(
             Post.objects.filter(text='Тестовая запись').exists())
+
+    def test_new_post_follow(self):
+        """Только авторизированный пользователь может комментировать посты."""
+        comments_count = Comment.objects.count()
+        form_data = {'text': 'Текст тестового комментария'}
+        response = self.authorized_client.post(
+            reverse('add_comment',
+                    kwargs={
+                        'username': self.user.username,
+                        'post_id': PostFormTests.post.id,
+                    }
+                    ),
+            data=form_data,
+            follow=True,
+        )
+        self.assertEqual(self.post.comments.count(), comments_count + 1)

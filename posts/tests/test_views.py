@@ -126,8 +126,5 @@ class PaginatorViewsTests(TestCase):
             group=self.group
         )
         response2 = self.guest_client.get('/')
-        self.assertHTMLEqual(str(response), str(response2), 'Что-то пошло не так')
-
-
-
-
+        self.assertHTMLEqual(str(response), str(response2),
+                             'Что-то пошло не так')
