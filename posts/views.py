@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from yatube.settings import PAGE_SIZE
 
 from .forms import PostForm, CommentForm
-from .models import Group, Post, User, Comment, Follow
+from .models import Group, Post, User, Follow
 
 
 def index(request):
