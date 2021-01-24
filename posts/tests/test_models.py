@@ -48,15 +48,20 @@ class GroupModelTest(TestCase):
         self.assertEqual(expected_object_name, str(group))
 
 
-class PostModelTest(TestCase):
+class PostCommentModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.post = Post.objects.create(
             text='Тест для поста',
             author=get_user_model().objects.create(username='Testname'))
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=get_user_model().objects.create(username='Testname1'),
+            text='тест'
+        )
 
-    def test_verbose_name(self):
+    def test_verbose_name_post(self):
         """verbose_name в полях совпадает с ожидаемым."""
         post = self.post
         field_verboses = {
@@ -68,7 +73,20 @@ class PostModelTest(TestCase):
                 self.assertEqual(
                     post._meta.get_field(value).verbose_name, expected)
 
-    def test_help_text(self):
+    def test_verbose_name_comment(self):
+        """verbose_name в полях совпадает с ожидаемым."""
+        comment = self.comment
+        field_verboses = {
+            'text': 'Комментарий',
+            'author': 'Автор',
+            'created': 'Дата публикации'
+        }
+        for value, expected in field_verboses.items():
+            with self.subTest(value=value):
+                self.assertEqual(
+                    comment._meta.get_field(value).verbose_name, expected)
+
+    def test_help_text_post(self):
         """help_text в полях совпадает с ожидаемым."""
         post = self.post
         field_help_texts = {

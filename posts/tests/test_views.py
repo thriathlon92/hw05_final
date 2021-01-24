@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Group, Post
+from posts.models import Group, Post,Comment
 
 
 class ViewsTests(TestCase):
@@ -20,6 +20,11 @@ class ViewsTests(TestCase):
             text='Тест для поста',
             author=get_user_model().objects.create(username='Testname'),
             group=cls.group
+        )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=get_user_model().objects.create(username='Testname1'),
+            text='тест'
         )
 
     def setUp(self):
@@ -116,7 +121,7 @@ class PaginatorViewsTests(TestCase):
         response = self.client.get(reverse('index') + '?page=2')
         self.assertEqual(len(response.context.get('page').object_list), 1)
 
-    def test_cache(self):
+    def test_cache_index_page(self):
         """Проверка работы кеша"""
         response = self.guest_client.get(reverse('index'))
 
