@@ -112,19 +112,19 @@ class PaginatorViewsTests(TestCase):
         self.assertEqual(len(response.context.get('page').object_list), 10)
 
     def test_second_page_containse_three_records(self):
-        """Проверка: на второй странице должно быть три поста."""
+        """Проверка: на второй странице должен быть один пост."""
         response = self.client.get(reverse('index') + '?page=2')
         self.assertEqual(len(response.context.get('page').object_list), 1)
 
     def test_cache(self):
         """Проверка работы кеша"""
-        response = self.guest_client.get('/')
+        response = self.guest_client.get(reverse('index'))
 
         Post.objects.create(
             text='Тест для поста',
             author=self.user,
             group=self.group
         )
-        response2 = self.guest_client.get('/')
+        response2 = self.guest_client.get(reverse('index'))
         self.assertHTMLEqual(str(response), str(response2),
                              'Что-то пошло не так')

@@ -55,6 +55,7 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     count = post_list.count()
+    form = CommentForm(request.POST or None)
     if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user, author=author).exists()
@@ -66,6 +67,7 @@ def profile(request, username):
         'count': count,
         'paginator': paginator,
         'following': following,
+        'form': form,
     }
 
     return render(request, 'profile.html', context)
@@ -82,7 +84,7 @@ def post_view(request, username, post_id):
     following = Follow.objects.filter(
         user__username=username
     ).count()
-    form = PostForm(request.POST or None)
+    form = CommentForm(request.POST or None)
     return render(request, 'post.html', {
         'author': post.author,
         'post': post,
