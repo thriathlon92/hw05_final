@@ -91,11 +91,20 @@ class PostFormTests(TestCase):
         response = self.authorized_client.post(
             reverse('add_comment',
                     kwargs={
-                        'username': self.user.username,
-                        'post_id': PostFormTests.post.id,
+                        'username': self.post.author.username,
+                        'post_id': self.post.id,
                     }
                     ),
             data=form_data,
             follow=True,
         )
+        self.assertRedirects(response,
+                             reverse('post',
+                                     kwargs={
+                                         'username': self.post.author.username,
+                                         'post_id': self.post.id}
+                                     )
+                             )
         self.assertEqual(Comment.objects.count(), comments_count + 1)
+        self.assertTrue(
+            Comment.objects.filter(text='Текст тестового комментария').exists())
