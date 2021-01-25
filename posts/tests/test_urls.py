@@ -119,6 +119,11 @@ class URLTests(TestCase):
 
     def test_new_url_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        response = self.authorized_client.get(
-            f'/{self.post.author.username}/{self.post.pk}/edit/')
+        response = self.authorized_client.get(reverse(
+            'post_edit', kwargs={
+                'username': self.post.author.username,
+                'post_id': self.post.pk,
+            }
+        )
+        )
         self.assertTemplateUsed(response, 'new.html')
