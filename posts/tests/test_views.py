@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Group, Post, Comment
+from posts.models import Group, Post, Comment, Follow
 
 
 class ViewsTests(TestCase):
@@ -25,6 +25,10 @@ class ViewsTests(TestCase):
             post=cls.post,
             author=get_user_model().objects.create(username='Testname1'),
             text='тест'
+        )
+        cls.follow = Follow.objects.create(
+            user=cls.comment.author,
+            author=cls.post.author
         )
 
     def setUp(self):
@@ -84,6 +88,24 @@ class ViewsTests(TestCase):
         self.assertEqual(post_text_0, self.post.text)
         self.assertEqual(post_author_0, self.post.author.username)
         self.assertEqual(post_group_0, self.group.title)
+
+    def test_authorized_client_follow(self):
+        """Проверка подписки к автору постов"""
+        self.authorized_client.get(reverse(
+            'profile_follow', kwargs={'username': self.follow.user.username}))
+        self.assertTrue(Follow.objects.filter(
+            user=self.follow.user,
+            author=self.follow.author
+        ).exists())
+
+    def test_authorized_client_unfollow(self):
+        """Проверка отписки от автора постов"""
+        self.authorized_client.get(
+            reverse('profile_unfollow', kwargs={'username': self.follow.user.username}))
+        self.assertFalse(Follow.objects.filter(
+            user=self.follow.user,
+            author=self.follow.author
+        ).exists())
 
 
 class PaginatorViewsTests(TestCase):
