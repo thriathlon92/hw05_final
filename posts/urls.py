@@ -10,7 +10,7 @@ urlpatterns = [
 
     # Профайл пользователя
     path('<str:username>/', views.profile, name='profile'),
-    path('<str:username>/<int:post_id>/comment',
+    path('<str:username>/<int:post_id>/comment/',
          views.add_comment,
          name='add_comment'
          ),
