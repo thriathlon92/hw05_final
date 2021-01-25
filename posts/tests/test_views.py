@@ -92,7 +92,7 @@ class ViewsTests(TestCase):
     def test_authorized_client_follow(self):
         """Проверка подписки к автору постов"""
         self.authorized_client.post(reverse(
-            'profile_follow', kwargs={'username': self.follow.user.username}))
+            'profile_follow', kwargs={'username': self.follow.user}), follow=True)
         self.assertTrue(Follow.objects.filter(
             user=self.follow.user,
             author=self.follow.author
@@ -101,7 +101,8 @@ class ViewsTests(TestCase):
     def test_authorized_client_unfollow(self):
         """Проверка отписки от автора постов"""
         self.authorized_client.post(
-            reverse('profile_unfollow', kwargs={'username': self.follow.user.username}))
+            reverse('profile_unfollow',
+                    kwargs={'username': self.follow.user}), follow=True)
         self.assertFalse(Follow.objects.filter(
             user=self.follow.user,
             author=self.follow.author
