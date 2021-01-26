@@ -26,14 +26,16 @@ class ViewsTests(TestCase):
             author=get_user_model().objects.create(username='Testname1'),
             text='тест'
         )
-       # cls.follow = Follow.objects.create(
-        #    user=cls.comment.author,
-        #    author=cls.post.author
-      #  )
+
+    # cls.follow = Follow.objects.create(
+    #    user=cls.comment.author,
+    #    author=cls.post.author
+    #  )
 
     def setUp(self):
         self.guest_client = Client()
         self.user = self.post.author
+        self.user1 = self.comment.author
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -89,41 +91,25 @@ class ViewsTests(TestCase):
         self.assertEqual(post_author_0, self.post.author.username)
         self.assertEqual(post_group_0, self.group.title)
 
-    def test_authorized_client_follow_unfollow(self):
-        """Проверка подписки/отписки к автору постов"""
-        follow_count = Follow.objects.count()
-        Follow.objects.create(
-            user=self.comment.author,
-            author=self.post.author
-        )
-        self.authorized_client.get(reverse(
-            'profile_follow', kwargs={'username': self.comment.author}))
-        self.assertEqual(Follow.objects.filter(
-                                user=self.comment.author,
-                                author=self.post.author
-        ).count(), follow_count + 1)
-
+    def test_follow_unfollow(self):
+        """Авторизованный пользователь может подписываться на других
+           пользователей и удалять их из подписок."""
+        author = self.comment.author
+        author_not_user = {'username': author.username}
+        reverse_follow = reverse('profile_follow', kwargs=author_not_user)
+        reverse_unfollow = reverse('profile_unfollow', kwargs=author_not_user)
+        self.authorized_client.get(reverse_follow)
+        self.assertTrue(Follow.objects.filter(author=author).exists())
+        self.authorized_client.get(reverse_unfollow)
+        self.assertFalse(Follow.objects.filter(author=author).exists())
 
     def test_authorized_client_author_cant_follow(self):
         """Проверка невозможности автора поста к самому себе"""
-        self.authorized_client.get(reverse(
-            'profile_follow', kwargs={'username': self.comment.author}))
-        self.assertFalse(Follow.objects.filter(
-            user=self.comment.author,
-            author=self.post.author
-        ).exists())
-
-    def test_authorized_client_unfollow(self):
-        """Проверка отписки от автора постов"""
-        self.authorized_client.get(reverse(
-            'profile_follow', kwargs={'username': self.comment.author}))
-        self.authorized_client.get(
-            reverse('profile_unfollow',
-                    kwargs={'username': self.comment.author}))
-        self.assertFalse(Follow.objects.filter(
-            user=self.comment.author,
-            author=self.post.author
-        ).exists())
+        author = self.post.author
+        author_is_user = {'username': author.username}
+        reverse_follow = reverse('profile_follow', kwargs=author_is_user)
+        self.authorized_client.get(reverse_follow)
+        self.assertFalse(Follow.objects.filter(author=author).exists())
 
 
 class PaginatorViewsTests(TestCase):
